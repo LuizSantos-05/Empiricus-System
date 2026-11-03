@@ -5,19 +5,25 @@ services:
     container_name: empiricus-mysql
     restart: unless-stopped
     environment:
-    DB_URL: jdbc:mysql://mysql:3306/empiricus
-    DB_USER: ${DB_USER:?Defina DB_USER no .env}
-    DB_PASSWD: ${DB_PASSWD:?Defina DB_PASSWD no .env}
+      MYSQL_DATABASE: empiricus_db
+      MYSQL_USER: ${DB_USER:?Defina DB_USER no .env}
+      MYSQL_PASSWORD: ${DB_PASSWD:?Defina DB_PASSWD no .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWD:?Defina DB_ROOT_PASSWD no .env}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./database/init:/docker-entrypoint-initdb.d:ro,Z
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -u root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
+
   backend:
     build:
       context: ./backend
@@ -25,13 +31,15 @@ services:
     container_name: empiricus-backend
     restart: unless-stopped
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/empiricus
-      DB_USER: empiricus_user
-      DB_PASSWORD: ${DB_PASSWD:?Defina DB_PASSWORD no .env}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:?Defina DB_USER no .env}
+      DB_PASSWD: ${DB_PASSWD:?Defina DB_PASSWD no .env}
     ports:
       - "8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
+
 volumes:
-  empiricus_data:
+  mysql_data:
