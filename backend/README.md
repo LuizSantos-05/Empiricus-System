@@ -35,7 +35,8 @@ variaveis de ambiente:
 
 | Variavel | Finalidade |
 |---|---|
-| `DB_URL` | URL JDBC do MySQL |
+| `DB_HOST` | Host do MySQL; use `localhost` fora do Docker e `mysql` no Compose |
+| `DB_PORT` | Porta do MySQL; use `3307` fora do Docker e `3306` no Compose |
 | `DB_USER` | Usuario do banco |
 | `DB_PASSWORD` | Senha do banco |
 | `JWT_SECRET` | Chave Base64 usada para assinar os JWTs |
