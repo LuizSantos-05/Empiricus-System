@@ -33,7 +33,7 @@ git clone https://github.com/LuizSantos-05/Empiricus-System
 Entre no diretório criado:
 
 ```bash
-cd Empiricus_System
+cd Empiricus-System
 ```
 
 ## 4. Configurar as variáveis de ambiente
