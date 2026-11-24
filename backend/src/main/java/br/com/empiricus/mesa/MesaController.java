@@ -26,11 +26,13 @@ public class MesaController {
 
     private final MesaService mesaService;
 
+    // Inicializa o controller com o serviço responsável pelas operações de mesa.
     public MesaController(MesaService mesaService) {
         this.mesaService = mesaService;
     }
 
     @GetMapping
+    // Lista todas as mesas ativas e não inativas do restaurante informado.
     public List<MesaDtos.Response> listar(
             @RequestParam @Positive Long restaurantId,
             @AuthenticationPrincipal User user) {
@@ -38,6 +40,7 @@ public class MesaController {
     }
 
     @GetMapping("/quantidade")
+    // Retorna a quantidade de mesas disponíveis para consulta no restaurante.
     public long quantidade(
             @RequestParam @Positive Long restaurantId,
             @AuthenticationPrincipal User user) {
@@ -45,6 +48,7 @@ public class MesaController {
     }
 
     @GetMapping("/{id}")
+    // Busca e retorna uma mesa específica pertencente ao restaurante informado.
     public MesaDtos.Response obter(
             @PathVariable @Positive Long id,
             @RequestParam @Positive Long restaurantId,
@@ -54,6 +58,7 @@ public class MesaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    // Cria uma nova mesa a partir dos dados validados da requisição.
     public MesaDtos.Response criar(
             @Valid @RequestBody MesaDtos.CreateRequest request,
             @AuthenticationPrincipal User user) {
@@ -61,6 +66,7 @@ public class MesaController {
     }
 
     @PutMapping("/{id}")
+    // Atualiza a capacidade e/ou o status de uma mesa existente.
     public MesaDtos.Response atualizar(
             @PathVariable @Positive Long id,
             @RequestParam @Positive Long restaurantId,
@@ -71,6 +77,7 @@ public class MesaController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    // Remove uma mesa após validar o restaurante e o usuário autenticado.
     public void remover(
             @PathVariable @Positive Long id,
             @RequestParam @Positive Long restaurantId,

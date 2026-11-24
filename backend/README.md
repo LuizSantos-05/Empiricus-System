@@ -20,9 +20,13 @@ Na raiz do projeto, configure as variaveis do arquivo `.env` e suba o banco:
 docker compose up -d mysql
 ```
 
-Depois, dentro deste diretorio, execute:
+Depois, dentro deste diretorio, carregue as variaveis do `.env` da raiz do
+projeto e execute:
 
 ```bash
+set -a
+source ../.env
+set +a
 mvn spring-boot:run
 ```
 
@@ -38,7 +42,7 @@ variaveis de ambiente:
 | `DB_HOST` | Host do MySQL; use `localhost` fora do Docker e `mysql` no Compose |
 | `DB_PORT` | Porta do MySQL; use `3307` fora do Docker e `3306` no Compose |
 | `DB_USER` | Usuario do banco |
-| `DB_PASSWORD` | Senha do banco |
+| `DB_PASSWD` | Senha do banco |
 | `JWT_SECRET` | Chave Base64 usada para assinar os JWTs |
 | `JWT_EXPIRATION_MS` | Tempo de validade do token em milissegundos |
 
