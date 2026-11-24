@@ -17,11 +17,11 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final SessionService sessionService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtService jwtService, SessionService sessionService) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -34,9 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorization != null && authorization.startsWith("Bearer ")) {
             String token = authorization.substring(7);
             try {
-                // O subject do JWT e usado para localizar o usuario atual no banco.
-                User user = userRepository.findByEmailIgnoreCase(jwtService.extractEmail(token)).orElse(null);
-                if (user != null && jwtService.isValid(token, user)) {
+                User user = sessionService.authenticate(token).orElse(null);
+                if (user != null) {
                     // Registra o usuario no contexto para que o Spring autorize a requisicao.
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());

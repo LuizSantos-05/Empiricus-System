@@ -87,8 +87,9 @@ retorna um JWT assinado:
 }
 ```
 
-O token nao e usado para substituir o hash da senha e nao e salvo na tabela de
-usuarios. Ele e uma credencial temporaria para acessar a API.
+O token nao e usado para substituir o hash da senha e nao e salvo em texto
+plano. Para permitir revogacao, o backend salva na tabela `user_sessions`
+somente o hash SHA-256 do token, junto com a validade e o estado da sessao.
 
 ### Validacao do token
 
@@ -101,12 +102,29 @@ Authorization: Bearer <token>
 ```
 
 O filtro JWT verifica a assinatura, a expiracao, o usuario associado e se ele
-continua ativo. Rotas diferentes de cadastro e login exigem autenticacao.
+continua ativo, alem de conferir a sessao persistida e o hash do token. Rotas
+diferentes de cadastro e login exigem autenticacao.
+
+### Gerenciamento de sessoes
+
+Todas as rotas abaixo exigem `Authorization: Bearer <token>`:
+
+| Metodo | Rota | Acao |
+|---|---|---|
+| `GET` | `/api/auth/sessions` | Lista as sessoes ativas do usuario e identifica a atual |
+| `DELETE` | `/api/auth/sessions/{sessionId}` | Revoga uma sessao pertencente ao usuario |
+| `POST` | `/api/auth/logout` | Revoga a sessao do token atual |
+| `POST` | `/api/auth/logout-all` | Revoga todas as sessoes ativas do usuario |
+
+O token da sessao atual deixa de funcionar assim que for revogado.
 
 ## Estrutura atual
 
 - `AuthController`: endpoints HTTP de cadastro, login e usuario autenticado.
-- `AuthService`: regras de cadastro, comparacao de senha e emissao de token.
+- `AuthService`: regras de cadastro e comparacao de senha.
+- `SessionController`: endpoints para listar e revogar sessoes.
+- `SessionService`: emissao, validacao e revogacao de sessoes.
+- `UserSession` e `UserSessionRepository`: persistencia das sessoes e dos hashes de token.
 - `User`: entidade JPA correspondente a tabela `users`.
 - `UserRepository`: consultas de usuario por email.
 - `JwtService`: criacao e validacao de tokens JWT.
