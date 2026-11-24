@@ -4,5 +4,6 @@ public enum StatusMesa {
     LIVRE,
     OCUPADO,
     RESERVADO,
-    EM_ESPERA
+    EM_ESPERA,
+    INATIVA
 }

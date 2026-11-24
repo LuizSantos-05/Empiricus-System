@@ -15,6 +15,7 @@ public class MesaService {
     private final MesaRepository mesaRepository;
     private final RestaurantAccessRepository restaurantAccessRepository;
 
+    // Inicializa o serviço com os repositórios utilizados nas operações de mesa.
     public MesaService(
             MesaRepository mesaRepository,
             RestaurantAccessRepository restaurantAccessRepository) {
@@ -23,36 +24,40 @@ public class MesaService {
     }
 
     @Transactional(readOnly = true)
+    // Valida o acesso e lista as mesas ativas, excluindo as mesas inativas.
     public List<MesaDtos.Response> listar(Long restaurantId, User user) {
         validarAcesso(restaurantId, user);
         return mesaRepository.findByRestaurantIdAndActiveTrueAndStatusNotOrderByIdAsc(
-                        restaurantId, MesaStatus.INACTIVE)
+                        restaurantId, StatusMesa.INATIVA)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
+    // Valida o acesso e retorna os dados da mesa solicitada.
     public MesaDtos.Response obter(Long restaurantId, Long id, User user) {
         validarAcesso(restaurantId, user);
         return toResponse(buscarMesa(restaurantId, id));
     }
 
     @Transactional(readOnly = true)
+    // Valida o acesso e conta as mesas ativas que não estão inativas.
     public long quantidade(Long restaurantId, User user) {
         validarAcesso(restaurantId, user);
         return mesaRepository.countByRestaurantIdAndActiveTrueAndStatusNot(
-                restaurantId, MesaStatus.INACTIVE);
+                restaurantId, StatusMesa.INATIVA);
     }
 
     @Transactional
+    // Valida o acesso e cria uma nova mesa, retornando um conflito se o número já existir.
     public MesaDtos.Response criar(MesaDtos.CreateRequest request, User user) {
         validarAcesso(request.restaurantId(), user);
         Mesa mesa = new Mesa(
                 request.restaurantId(),
                 request.tableNumber().trim(),
                 request.capacidade(),
-                toEntityStatus(request.status()));
+                request.status());
         try {
             return toResponse(mesaRepository.saveAndFlush(mesa));
         } catch (DataIntegrityViolationException exception) {
@@ -62,6 +67,7 @@ public class MesaService {
     }
 
     @Transactional
+    // Valida os dados, atualiza os campos informados e persiste a mesa existente.
     public MesaDtos.Response atualizar(
             Long restaurantId,
             Long id,
@@ -76,11 +82,12 @@ public class MesaService {
         Mesa mesa = buscarMesa(restaurantId, id);
         mesa.update(
                 request.capacidade(),
-                request.status() == null ? null : toEntityStatus(request.status()));
+                request.status());
         return toResponse(mesaRepository.save(mesa));
     }
 
     @Transactional
+    // Valida o acesso e remove a mesa, impedindo a exclusão quando houver registros vinculados.
     public void remover(Long restaurantId, Long id, User user) {
         validarAcesso(restaurantId, user);
         Mesa mesa = buscarMesa(restaurantId, id);
@@ -95,13 +102,15 @@ public class MesaService {
         }
     }
 
+    // Localiza uma mesa ativa e não inativa pelo identificador e pelo restaurante.
     private Mesa buscarMesa(Long restaurantId, Long id) {
         return mesaRepository
                 .findByIdAndRestaurantIdAndActiveTrueAndStatusNot(
-                        id, restaurantId, MesaStatus.INACTIVE)
+                        id, restaurantId, StatusMesa.INATIVA)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mesa nao encontrada"));
     }
 
+    // Verifica se o identificador é válido e se o usuário possui vínculo ativo com o restaurante.
     private void validarAcesso(Long restaurantId, User user) {
         if (restaurantId == null || restaurantId <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "restaurantId deve ser positivo");
@@ -111,29 +120,11 @@ public class MesaService {
         }
     }
 
+    // Converte uma entidade Mesa para o formato de resposta da API.
     private MesaDtos.Response toResponse(Mesa mesa) {
         return new MesaDtos.Response(
                 mesa.getId(),
-                toApiStatus(mesa.getStatus()),
+                mesa.getStatus(),
                 mesa.getCapacity());
-    }
-
-    private MesaStatus toEntityStatus(StatusMesa status) {
-        return switch (status) {
-            case LIVRE -> MesaStatus.FREE;
-            case OCUPADO -> MesaStatus.OCCUPIED;
-            case RESERVADO -> MesaStatus.RESERVED;
-            case EM_ESPERA -> MesaStatus.WAITING;
-        };
-    }
-
-    private StatusMesa toApiStatus(MesaStatus status) {
-        return switch (status) {
-            case FREE -> StatusMesa.LIVRE;
-            case OCCUPIED -> StatusMesa.OCUPADO;
-            case RESERVED -> StatusMesa.RESERVADO;
-            case WAITING -> StatusMesa.EM_ESPERA;
-            case INACTIVE -> throw new IllegalStateException("Mesas inativas nao devem ser retornadas");
-        };
     }
 }

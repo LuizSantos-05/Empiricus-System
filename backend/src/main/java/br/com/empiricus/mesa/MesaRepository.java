@@ -7,14 +7,17 @@ import java.util.Optional;
 
 public interface MesaRepository extends JpaRepository<Mesa, Long> {
 
+    // Busca todas as mesas ativas de um restaurante que não estejam inativas, em ordem crescente.
     List<Mesa> findByRestaurantIdAndActiveTrueAndStatusNotOrderByIdAsc(
             Long restaurantId,
-            MesaStatus status);
+            StatusMesa status);
 
+    // Busca uma mesa ativa e não inativa pelo identificador da mesa e do restaurante.
     Optional<Mesa> findByIdAndRestaurantIdAndActiveTrueAndStatusNot(
             Long id,
             Long restaurantId,
-            MesaStatus status);
+            StatusMesa status);
 
-    long countByRestaurantIdAndActiveTrueAndStatusNot(Long restaurantId, MesaStatus status);
+    // Conta as mesas ativas de um restaurante que não estejam com status inativo.
+    long countByRestaurantIdAndActiveTrueAndStatusNot(Long restaurantId, StatusMesa status);
 }

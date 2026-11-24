@@ -10,6 +10,7 @@ class RestaurantAccessRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
+    // Verifica se o usuário possui associação ativa em um restaurante também ativo.
     boolean hasActiveMembership(Long userId, Long restaurantId) {
         Number membershipCount = (Number) entityManager.createNativeQuery("""
                 SELECT COUNT(*)

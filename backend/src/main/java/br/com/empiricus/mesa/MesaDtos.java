@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 
 public final class MesaDtos {
 
+    // Impede instanciar esta classe usada exclusivamente como agrupador de DTOs.
     private MesaDtos() {
     }
 
