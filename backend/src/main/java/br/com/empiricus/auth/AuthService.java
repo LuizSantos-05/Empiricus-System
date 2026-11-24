@@ -11,12 +11,15 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final SessionService sessionService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            SessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.sessionService = sessionService;
     }
 
     @Transactional
@@ -32,10 +35,10 @@ public class AuthService {
                 request.name().trim(),
                 email,
                 passwordEncoder.encode(request.password())));
-        return responseFor(user);
+        return sessionService.createSession(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthDtos.AuthResponse login(AuthDtos.LoginRequest request) {
         String email = normalizeEmail(request.email());
         // Retornar a mesma mensagem nos dois erros evita revelar se o email existe.
@@ -48,12 +51,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou senha invalidos");
         }
 
-        return responseFor(user);
-    }
-
-    private AuthDtos.AuthResponse responseFor(User user) {
-        // O JWT e devolvido ao cliente e sera enviado no header Authorization.
-        return new AuthDtos.AuthResponse(jwtService.generateToken(user), "Bearer", jwtService.getExpirationMs());
+        return sessionService.createSession(user);
     }
 
     private String normalizeEmail(String email) {

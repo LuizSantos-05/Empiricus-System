@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 public final class AuthDtos {
 
     private AuthDtos() {
@@ -38,4 +40,7 @@ public final class AuthDtos {
         // Resposta segura da rota /me, sem expor o hash da senha.
         public record UserResponse(Long id, String name, String email) {
         }
+
+    public record SessionResponse(String id, LocalDateTime createdAt, LocalDateTime expiresAt, boolean current) {
+    }
 }

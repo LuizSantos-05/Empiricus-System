@@ -25,29 +25,32 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(User user) {
+    public String generateToken(User user, String sessionId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expirationMs);
 
-        // O email identifica o usuario; o ID permite referencia-lo sem incluir dados sensiveis.
+        // O ID da sessao permite revogar o token sem armazenar o JWT em texto puro.
         return Jwts.builder()
                 .subject(user.getEmail())
-                .claim("userId", user.getId())
+                .claim("userId", user.getId().toString())
+                .claim("sessionId", sessionId)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(signingKey)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return parseClaims(token).getSubject();
+    public String extractSessionId(String token) {
+        return parseClaims(token).get("sessionId", String.class);
     }
 
-    public boolean isValid(String token, User user) {
+    public boolean isValid(String token, User user, String sessionId) {
         try {
             Claims claims = parseClaims(token);
             // A assinatura, o usuario, a expiracao e o status ativo precisam ser validos.
             return claims.getSubject().equalsIgnoreCase(user.getEmail())
+                    && claims.get("userId", String.class).equals(user.getId().toString())
+                    && claims.get("sessionId", String.class).equals(sessionId)
                     && claims.getExpiration().after(new Date())
                     && user.isActive();
         } catch (RuntimeException exception) {
