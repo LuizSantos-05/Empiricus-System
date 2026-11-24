@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
 //flutter run -d web-server --web-port 8080
 
@@ -17,18 +18,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _fazerLogin() {
     if (_formKey.currentState!.validate()) {
-      final email = _emailController.text;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.white,
-          content: Text(
-            'A tentar login com: $email',
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
