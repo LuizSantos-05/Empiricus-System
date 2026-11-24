@@ -1,5 +1,6 @@
 package br.com.empiricus.auth;
 
+import br.com.empiricus.error.ApiSecurityExceptionHandler;
 import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
-            throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ApiSecurityExceptionHandler apiSecurityExceptionHandler) throws Exception {
         return http
             // A API usa JWT e nao depende de cookies de sessao, portanto CSRF nao se aplica aqui.
                 .csrf(csrf -> csrf.disable())
@@ -27,6 +30,9 @@ public class SecurityConfig {
                 // Somente cadastro e login sao publicos.
                     .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(apiSecurityExceptionHandler)
+                        .accessDeniedHandler(apiSecurityExceptionHandler))
             // Valida o JWT antes das regras de autorizacao do Spring Security.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

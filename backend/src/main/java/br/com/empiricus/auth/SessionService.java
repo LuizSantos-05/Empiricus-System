@@ -99,15 +99,18 @@ public class SessionService {
     private void revokeSession(User user, String sessionId, String token) {
         UserSession session = ownedSession(user, sessionId);
         if (!matchesToken(token, session.getTokenHash())) {
+            // Trata a tentativa de revogar uma sessao usando outro token que nao o token armazenado.
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sessao invalida");
         }
         session.revoke(LocalDateTime.now());
     }
 
     private UserSession ownedSession(User user, String sessionId) {
+        // Trata uma sessao que nao existe sem revelar informacoes sobre outros usuarios.
         UserSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sessao nao encontrada"));
         if (!session.getUser().getId().equals(user.getId())) {
+            // Trata tentativas de consultar ou revogar sessoes pertencentes a outro usuario.
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sessao nao encontrada");
         }
         return session;
@@ -118,6 +121,7 @@ public class SessionService {
     }
 
     private String bearerToken(String authorizationHeader) {
+        // Trata chamadas de gerenciamento de sessao sem um cabecalho Bearer valido.
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Bearer obrigatorio");
         }
@@ -125,6 +129,7 @@ public class SessionService {
     }
 
     private String hashToken(String token) {
+        // Trata a indisponibilidade inesperada do algoritmo SHA-256 exigido para armazenar tokens com seguranca.
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(token.getBytes(StandardCharsets.UTF_8));

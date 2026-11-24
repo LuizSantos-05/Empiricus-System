@@ -122,6 +122,14 @@ Todas as rotas abaixo exigem `Authorization: Bearer <token>`:
 
 O token da sessao atual deixa de funcionar assim que for revogado.
 
+## Tratamento de erros
+
+As falhas da API retornam um JSON padronizado com `status` e `message`. Erros de
+validacao e requisicoes malformadas retornam `400`; autenticacao e autorizacao
+retornam `401` e `403`; recursos inexistentes retornam `404`; conflitos com
+restricoes de dados retornam `409`. Falhas inesperadas retornam uma mensagem
+generica `500`, enquanto os detalhes tecnicos ficam restritos aos logs do servidor.
+
 ## Gerenciamento de mesas
 
 As rotas abaixo exigem um JWT no cabecalho `Authorization: Bearer <token>` e
