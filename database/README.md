@@ -20,6 +20,7 @@ Os scripts SQL estão organizados por responsabilidade:
 | `005_create_orders.sql` | Pedidos e itens dos pedidos |
 | `006_create_inventory.sql` | Itens e movimentações do estoque |
 | `007_create_user_sessions.sql` | Sessões de autenticação dos usuários |
+| `008_extend_table_status.sql` | Adiciona status reservado e em espera às mesas |
 
 ## 3. Inicialização
 
@@ -28,7 +29,7 @@ Os scripts devem ser executados em ordem numérica, em um banco vazio.
 No ambiente Docker, os scripts presentes em `/docker-entrypoint-initdb.d` são executados durante a inicialização de um diretório de dados vazio do MySQL.
 
 Se o volume já estiver inicializado, adicionar ou alterar um arquivo nessa pasta não faz com que ele seja executado automaticamente.
-Para um volume existente, aplique `007_create_user_sessions.sql` manualmente antes de iniciar a versão do backend que usa a tabela `user_sessions`.
+Para um volume existente, aplique manualmente cada script novo ainda não executado antes de iniciar a versão do backend que depende dele.
 
 ## 4. Alterações futuras
 

@@ -17,3 +17,6 @@ backend/target/
 # IDEs
 .idea/
 .vscode/
+
+# Logs de erro
+problems-report.html

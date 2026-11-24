@@ -118,6 +118,37 @@ Todas as rotas abaixo exigem `Authorization: Bearer <token>`:
 
 O token da sessao atual deixa de funcionar assim que for revogado.
 
+## Gerenciamento de mesas
+
+As rotas abaixo exigem um JWT no cabecalho `Authorization: Bearer <token>` e
+um vinculo ativo do usuario com o restaurante (`user_restaurants`). As rotas
+de leitura, atualizacao e remocao recebem `restaurantId` como query parameter
+para manter o isolamento entre restaurantes.
+
+| Metodo | Rota | Acao |
+|---|---|---|
+| `GET` | `/api/mesas?restaurantId={id}` | Lista mesas ativas do restaurante |
+| `GET` | `/api/mesas/{id}?restaurantId={id}` | Consulta uma mesa |
+| `GET` | `/api/mesas/quantidade?restaurantId={id}` | Conta mesas ativas |
+| `POST` | `/api/mesas` | Cadastra uma mesa |
+| `PUT` | `/api/mesas/{id}?restaurantId={id}` | Atualiza capacidade e/ou status |
+| `DELETE` | `/api/mesas/{id}?restaurantId={id}` | Remove uma mesa |
+
+O cadastro recebe `restaurantId`, `tableNumber`, `capacidade` e `status`. A
+capacidade deve ser entre 1 e 65535; o status aceita `LIVRE`, `OCUPADO`,
+`RESERVADO` ou `EM_ESPERA`. A resposta contém `id`, `status` e `capacidade`.
+Na atualizacao, os campos omitidos permanecem inalterados. Uma mesa ausente
+retorna `404`; vinculo ausente retorna `403`; conflito com registros
+relacionados ou numero de mesa duplicado retorna `409`.
+
+O esquema preexistente tambem exige `table_number` e associa cada mesa a um
+restaurante. O script `../database/init/008_extend_table_status.sql` amplia o
+ENUM no MySQL mantendo os status ja existentes. Em bancos cujo volume ja foi
+inicializado, aplique esse script manualmente antes de executar a nova versao.
+
+O Flutter atual nao possui uma tela de gerenciamento de mesas; por isso, esta
+implementacao disponibiliza a API sem alterar a interface existente.
+
 ## Estrutura atual
 
 - `AuthController`: endpoints HTTP de cadastro, login e usuario autenticado.
@@ -131,6 +162,8 @@ O token da sessao atual deixa de funcionar assim que for revogado.
 - `JwtAuthenticationFilter`: leitura do header `Authorization`.
 - `SecurityConfig`: regras de seguranca e codificador BCrypt.
 - `AuthDtos`: objetos de entrada e saida da API.
+- `MesaController`, `MesaService`, `MesaRepository` e `Mesa`: API e persistencia
+  das mesas, com verificacao de vinculo ao restaurante autenticado.
 
 ## Modulos planejados
 
