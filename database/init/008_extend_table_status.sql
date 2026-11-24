@@ -1,0 +1,5 @@
+USE empiricus_db;
+
+ALTER TABLE dining_tables
+    MODIFY COLUMN status ENUM('FREE', 'OCCUPIED', 'INACTIVE', 'RESERVED', 'WAITING')
+    NOT NULL DEFAULT 'FREE';
