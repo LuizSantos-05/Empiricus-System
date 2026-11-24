@@ -29,7 +29,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 3. VÍNCULO ENTRE USUÁRIOS E RESTAURANTES
+-- 3. VÍNCULO ENTRE USUÁRIOS E RESTAURANTES (Decoradores)
 -- =====================================================
 
 CREATE TABLE user_restaurants (
