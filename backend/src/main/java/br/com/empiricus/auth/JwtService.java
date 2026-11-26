@@ -2,6 +2,7 @@ package br.com.empiricus.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -48,12 +49,13 @@ public class JwtService {
         try {
             Claims claims = parseClaims(token);
             // A assinatura, o usuario, a expiracao e o status ativo precisam ser validos.
-            return claims.getSubject().equalsIgnoreCase(user.getEmail())
-                    && claims.get("userId", String.class).equals(user.getId().toString())
-                    && claims.get("sessionId", String.class).equals(sessionId)
+            return user.getEmail().equalsIgnoreCase(claims.getSubject())
+                    && java.util.Objects.equals(claims.get("userId", String.class), user.getId().toString())
+                    && java.util.Objects.equals(claims.get("sessionId", String.class), sessionId)
                     && claims.getExpiration().after(new Date())
                     && user.isActive();
-        } catch (RuntimeException exception) {
+        // Trata tokens adulterados, expirados ou com claims invalidas como nao autenticados.
+        } catch (JwtException | IllegalArgumentException exception) {
             return false;
         }
     }

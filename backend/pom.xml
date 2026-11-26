@@ -31,6 +31,12 @@
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
+        <!-- Serializacao JSON das requisicoes e das respostas padronizadas da API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
+
         <!-- Persistência com JPA e Hibernate -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

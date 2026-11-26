@@ -42,7 +42,7 @@ public class MesaService {
     }
 
     @Transactional(readOnly = true)
-    // Valida o acesso e conta as mesas ativas que não estão inativas.
+    // Valida o acesso e conta as mesas ativas.
     public long quantidade(Long restaurantId, User user) {
         validarAcesso(restaurantId, user);
         return mesaRepository.countByRestaurantIdAndActiveTrueAndStatusNot(
@@ -58,6 +58,7 @@ public class MesaService {
                 request.tableNumber().trim(),
                 request.capacidade(),
                 request.status());
+        // Trata numero de mesa duplicado ou outro conflito de integridade durante a criacao.
         try {
             return toResponse(mesaRepository.saveAndFlush(mesa));
         } catch (DataIntegrityViolationException exception) {
@@ -75,6 +76,7 @@ public class MesaService {
             User user) {
         validarAcesso(restaurantId, user);
         if (request.capacidade() == null && request.status() == null) {
+            // Trata uma atualizacao sem nenhum campo para modificar.
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Informe a capacidade ou o status para atualizar");
         }
@@ -91,6 +93,7 @@ public class MesaService {
     public void remover(Long restaurantId, Long id, User user) {
         validarAcesso(restaurantId, user);
         Mesa mesa = buscarMesa(restaurantId, id);
+        // Trata a tentativa de remover uma mesa ainda referenciada por outros registros.
         try {
             mesaRepository.delete(mesa);
             mesaRepository.flush();
@@ -104,6 +107,7 @@ public class MesaService {
 
     // Localiza uma mesa ativa e não inativa pelo identificador e pelo restaurante.
     private Mesa buscarMesa(Long restaurantId, Long id) {
+        // Trata a consulta de uma mesa ausente, inativa ou pertencente a outro restaurante.
         return mesaRepository
                 .findByIdAndRestaurantIdAndActiveTrueAndStatusNot(
                         id, restaurantId, StatusMesa.INATIVA)
@@ -113,9 +117,11 @@ public class MesaService {
     // Verifica se o identificador é válido e se o usuário possui vínculo ativo com o restaurante.
     private void validarAcesso(Long restaurantId, User user) {
         if (restaurantId == null || restaurantId <= 0) {
+            // Trata identificadores de restaurante ausentes ou fora do intervalo permitido.
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "restaurantId deve ser positivo");
         }
         if (!restaurantAccessRepository.hasActiveMembership(user.getId(), restaurantId)) {
+            // Trata usuarios sem vinculo ativo com o restaurante solicitado.
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuario nao possui acesso ao restaurante");
         }
     }

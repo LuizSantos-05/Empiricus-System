@@ -33,6 +33,7 @@ public class MesaStatusConverter implements AttributeConverter<StatusMesa, Strin
             case "RESERVED" -> StatusMesa.RESERVADO;
             case "WAITING" -> StatusMesa.EM_ESPERA;
             case "INACTIVE" -> StatusMesa.INATIVA;
+            // Trata valores persistidos que nao correspondem a nenhum status suportado pela aplicacao.
             default -> throw new IllegalArgumentException("Status de mesa desconhecido: " + status);
         };
     }

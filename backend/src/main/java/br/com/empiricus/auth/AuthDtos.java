@@ -14,9 +14,11 @@ public final class AuthDtos {
         // Dados recebidos no cadastro; as anotacoes fazem a validacao antes do service.
     public record RegisterRequest(
             @NotBlank(message = "Nome e obrigatorio")
+            @Size(max = 150, message = "O nome deve ter no maximo 150 caracteres")
             String name,
             @NotBlank(message = "Email e obrigatorio")
             @Email(message = "Email invalido")
+            @Size(max = 190, message = "O email deve ter no maximo 190 caracteres")
             String email,
             @NotBlank(message = "Senha e obrigatoria")
             @Size(min = 8, message = "A senha deve ter no minimo 8 caracteres")
