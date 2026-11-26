@@ -161,6 +161,70 @@ inicializado, aplique esse script manualmente antes de executar a nova versao.
 O Flutter atual nao possui uma tela de gerenciamento de mesas; por isso, esta
 implementacao disponibiliza a API sem alterar a interface existente.
 
+## Gerenciamento da fila de espera
+
+O modulo permite cadastrar pessoas aguardando uma mesa e mantem uma sequencia
+continua de atendimento por restaurante. Os dados persistidos sao:
+
+| Campo | Tipo | Regras |
+|---|---|---|
+| `posicao` | inteiro | Controlado pelo backend; inicia em 1 e nao possui lacunas |
+| `nome` | texto | Obrigatorio, com ate 150 caracteres |
+| `quantidadePessoas` | inteiro | Obrigatorio e positivo, ate 65535 |
+| `telefone` | texto | Obrigatorio, com ate 30 caracteres |
+| `email` | texto | Obrigatorio, formato de e-mail valido |
+
+As rotas abaixo exigem JWT e vinculo ativo do usuario autenticado com o
+restaurante informado por `restaurantId`.
+
+| Metodo | Rota | Acao |
+|---|---|---|
+| `GET` | `/api/fila-espera?restaurantId={id}` | Lista a fila em ordem de atendimento |
+| `POST` | `/api/fila-espera?restaurantId={id}` | Adiciona uma pessoa ao final da fila |
+| `PUT` | `/api/fila-espera/{id}?restaurantId={id}` | Atualiza dados sem alterar a posicao |
+| `DELETE` | `/api/fila-espera/{id}?restaurantId={id}` | Remove uma pessoa e reorganiza a fila |
+
+O alias `/api/waitlist` disponibiliza os mesmos metodos e regras.
+
+Exemplo de cadastro:
+
+```json
+{
+  "nome": "Maria Silva",
+  "quantidadePessoas": 4,
+  "telefone": "(45) 99999-9999",
+  "email": "maria@example.com"
+}
+```
+
+A API tambem aceita os aliases `name`, `partySize`, `phone` e `emailContato`
+para interoperabilidade. A resposta usa os nomes:
+
+```json
+{
+  "id": 12,
+  "posicao": 3,
+  "nome": "Maria Silva",
+  "quantidadePessoas": 4,
+  "telefone": "(45) 99999-9999",
+  "email": "maria@example.com"
+}
+```
+
+Os cadastros sao realizados dentro de transacoes e todas as operacoes de
+criacao, atualizacao e remocao bloqueiam pessimisticamente a linha do
+restaurante no MySQL. Isso serializa alteracoes da fila entre requisicoes e
+entre instancias da aplicacao antes que as posicoes sejam calculadas ou
+reorganizadas. A criacao usa a ultima posicao validada e a remocao recalcula
+sequencialmente as posicoes restantes dentro da mesma transacao.
+
+Uma chave unica em `(restaurant_id, position)` reforca a integridade no banco.
+Durante a reorganizacao, todas as posicoes sao deslocadas temporariamente antes
+de receberem novamente a sequencia 1, 2, 3, evitando colisao com a unicidade.
+Requisicoes concorrentes, edicoes preservam a posicao, dados invalidos retornam
+`400`, acesso sem vinculo ativo retorna `403`, registros inexistentes retornam
+`404` e conflitos de integridade retornam `409`.
+
 ## Estrutura atual
 
 - `AuthController`: endpoints HTTP de cadastro, login e usuario autenticado.

@@ -5,13 +5,13 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 @Repository
-class RestaurantAccessRepository {
+public class RestaurantAccessRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     // Verifica se o usuário possui associação ativa em um restaurante também ativo.
-    boolean hasActiveMembership(Long userId, Long restaurantId) {
+    public boolean hasActiveMembership(Long userId, Long restaurantId) {
         Number membershipCount = (Number) entityManager.createNativeQuery("""
                 SELECT COUNT(*)
                 FROM user_restaurants ur
@@ -25,5 +25,17 @@ class RestaurantAccessRepository {
                 .setParameter("restaurantId", restaurantId)
                 .getSingleResult();
         return membershipCount.longValue() > 0;
+    }
+
+    public void lockRestaurant(Long restaurantId) {
+        entityManager.createNativeQuery("""
+                SELECT id
+                FROM restaurants
+                WHERE id = :restaurantId
+                  AND active = TRUE
+                FOR UPDATE
+                """)
+                .setParameter("restaurantId", restaurantId)
+                .getResultList();
     }
 }

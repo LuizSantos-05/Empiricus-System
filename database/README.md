@@ -21,6 +21,7 @@ Os scripts SQL estão organizados por responsabilidade:
 | `006_create_inventory.sql` | Itens e movimentações do estoque |
 | `007_create_user_sessions.sql` | Sessões de autenticação dos usuários |
 | `008_extend_table_status.sql` | Adiciona status reservado e em espera às mesas |
+| `009_waitlist_queue.sql` | Adiciona email e posição controlada à fila de espera |
 
 ## 3. Inicialização
 
