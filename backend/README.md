@@ -243,8 +243,9 @@ Requisicoes concorrentes, edicoes preservam a posicao, dados invalidos retornam
 
 ## Modulos planejados
 
-Os modulos abaixo correspondem as tabelas ja previstas nos scripts SQL e serao
-implementados mantendo a autenticacao e o isolamento por restaurante:
+Os modulos abaixo correspondem as funcionalidades planejadas e mantem a
+autenticacao e o isolamento por restaurante. A existencia de tabelas no banco
+nao significa que a API do modulo ja esteja implementada:
 
 1. **Restaurantes e vinculos de usuario**: cadastro de restaurantes, papeis e
    permissoes (`restaurants` e `user_restaurants`).
@@ -258,6 +259,10 @@ implementados mantendo a autenticacao e o isolamento por restaurante:
    (`orders` e `order_items`).
 6. **Estoque**: itens, entradas, saidas e movimentacoes com transacoes
    (`inventory_items` e `inventory_movements`).
+7. **Sistema Fiscal**: registro de notas fiscais de venda emitidas, vinculadas
+   a pedidos, com numero, serie, valor total e data de emissao
+   (`sales_invoices`). O script `../database/init/010_create_sales_invoices.sql`
+   cria essa estrutura; emissao e integracao fiscal nao estao implementadas.
 
 ## Boas praticas para os proximos modulos
 

@@ -22,6 +22,7 @@ Os scripts SQL estão organizados por responsabilidade:
 | `007_create_user_sessions.sql` | Sessões de autenticação dos usuários |
 | `008_extend_table_status.sql` | Adiciona status reservado e em espera às mesas |
 | `009_waitlist_queue.sql` | Adiciona email e posição controlada à fila de espera |
+| `010_create_sales_invoices.sql` | Registra notas fiscais de venda vinculadas a pedidos |
 
 ## 3. Inicialização
 
